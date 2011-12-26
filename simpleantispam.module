@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * Implementation of hook_form_alter()
+ */
+function simpleantispam_form_alter(&$form, &$form_state, $form_id) {
+  global $user;
+
+  if ($form_id == 'comment_node_blog_form' && !in_array('administrator', $user->roles)) {
+    $form['imnotbot'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('I\'m not a spammer'),
+      '#weight' => 0.01,
+      '#element_validate' => array('_simpleantispam_checkbox_validate'),
+    );
+  }
+}
+
+/**
+ * Validation function for the spammer's checkbox.
+ */
+function _simpleantispam_checkbox_validate($element, &$form_state) {
+  if ($element['#value'] !== 1) {
+    form_error($element, t('You must confirm that you are not a spammer.'));
+
+    watchdog(
+        'simpleantispam',
+        'Blocked a spam comment. <b>Name</b>: ' . check_plain($form_state['values']['name']) . ', <b>Message</b>: ' . check_plain($form_state['values']['comment_body']['und'][0]['value']),
+        null,
+        WATCHDOG_WARNING
+    );
+  }
+}

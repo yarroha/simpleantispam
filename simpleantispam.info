@@ -1,0 +1,5 @@
+; $Id$
+name = Simple AntiSpam
+description = Простой антиспам модуль
+version = 7.x
+core = 7.x
